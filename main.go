@@ -1,13 +1,12 @@
 package main
 
 import (
-	"database/sql"
 	"log"
 	"os"
 
 	"github.com/Yom3n/RecipeApiGo/api"
+	"github.com/Yom3n/RecipeApiGo/db"
 	"github.com/joho/godotenv"
-	_ "github.com/lib/pq"
 )
 
 func main() {
@@ -16,6 +15,9 @@ func main() {
 		log.Fatal("Error loading .env file", err)
 	}
 
+	dbAddress := os.Getenv("DB_ADDRESS")
+	db := db.NewPostgressDb(dbAddress)
+	
 	serverPort := os.Getenv("SERVER_PORT")
 	if serverPort == "" {
 		log.Fatal("Missing SERVER_PORT env variable")

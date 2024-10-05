@@ -1,12 +1,18 @@
 package db
 
-func NewPostgressDb(){
+import (
+	"database/sql"
+	"log"
 
-	dbAddress := os.Getenv("DB_ADDRESS")
-	if dbAddress == "" {
+	_ "github.com/lib/pq"
+)
+
+func NewPostgressDb(dbUrl string) *sql.DB {
+
+	if dbUrl == "" {
 		log.Fatal("Missind DB_ADDRESS env variable")
 	}
-	db_conn, err := sql.Open("postgres", dbAddress)
+	db_conn, err := sql.Open("postgres", dbUrl)
 	if err != nil {
 		log.Fatal("Couldn't open databse: ", err)
 	}
@@ -14,4 +20,5 @@ func NewPostgressDb(){
 	if pingErr != nil {
 		log.Fatal("Couldn't ping database: ", pingErr)
 	}
+	return db_conn
 }
