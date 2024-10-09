@@ -1,7 +1,9 @@
 package main
 
 import (
+	"encoding/json"
 	"log"
+	"net/http"
 	"os"
 
 	"github.com/Yom3n/RecipeApiGo/api"
@@ -16,12 +18,18 @@ func main() {
 	}
 
 	dbAddress := os.Getenv("DB_ADDRESS")
-	db := db.NewPostgressDb(dbAddress)
-	
+	db.NewPostgressDb(dbAddress)
+
 	serverPort := os.Getenv("SERVER_PORT")
 	if serverPort == "" {
 		log.Fatal("Missing SERVER_PORT env variable")
 	}
-	server := api.NewAPIServer(serverPort)
+
+	muxHandler := http.NewServeMux()
+	muxHandler.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
+		dat, _ := json.Marshal(map[string]string{"greetings": "hello world"})
+		w.Write(dat)
+	})
+	server := api.NewAPIServer(serverPort, muxHandler)
 	log.Fatal(server.Run())
 }

@@ -7,18 +7,21 @@ import (
 
 type APIServer struct {
 	address string
+	handler *http.ServeMux
 }
 
-func NewAPIServer(address string) APIServer {
+func NewAPIServer(address string, handler *http.ServeMux) APIServer {
 	return APIServer{
 		address: address,
+		handler: handler,
 	}
 }
 
 func (s *APIServer) Run() error {
 	fmt.Println("Starting server at :8080")
 	server := &http.Server{
-		Addr: s.address,
+		Addr:    s.address,
+		Handler: s.handler,
 	}
 	return server.ListenAndServe()
 }

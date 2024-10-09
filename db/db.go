@@ -20,5 +20,6 @@ func NewPostgressDb(dbUrl string) *sql.DB {
 	if pingErr != nil {
 		log.Fatal("Couldn't ping database: ", pingErr)
 	}
+	log.Print("Connected to database")
 	return db_conn
 }
