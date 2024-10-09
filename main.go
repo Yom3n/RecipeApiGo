@@ -1,13 +1,13 @@
 package main
 
 import (
-	"encoding/json"
 	"log"
 	"net/http"
 	"os"
 
 	"github.com/Yom3n/RecipeApiGo/api"
 	"github.com/Yom3n/RecipeApiGo/db"
+	"github.com/Yom3n/RecipeApiGo/utils"
 	"github.com/joho/godotenv"
 )
 
@@ -27,8 +27,8 @@ func main() {
 
 	muxHandler := http.NewServeMux()
 	muxHandler.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
-		dat, _ := json.Marshal(map[string]string{"greetings": "hello world"})
-		w.Write(dat)
+		payload := map[string]string{"greetings": "hello world"}
+		utils.RespondWithJson(w, 200, payload)
 	})
 	server := api.NewAPIServer(serverPort, muxHandler)
 	log.Fatal(server.Run())
