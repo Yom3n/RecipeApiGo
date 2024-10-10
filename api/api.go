@@ -10,7 +10,9 @@ type APIServer struct {
 	handler *http.ServeMux
 }
 
-func NewAPIServer(address string, handler *http.ServeMux) APIServer {
+func NewAPIServer(address string) APIServer {
+handler := http.NewServeMux()
+	handler.HandleFunc("GET /healthz/", healthz.HandlerReadines)
 	return APIServer{
 		address: address,
 		handler: handler,

@@ -26,7 +26,7 @@ func main() {
 	}
 
 	muxHandler := http.NewServeMux()
-	muxHandler.HandleFunc("GET /healthz/", healthz.HandlerReadines)
+	
 	server := api.NewAPIServer(serverPort, muxHandler)
 	log.Fatal(server.Run())
 }
