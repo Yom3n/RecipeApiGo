@@ -7,7 +7,7 @@ import (
 
 	"github.com/Yom3n/RecipeApiGo/api"
 	"github.com/Yom3n/RecipeApiGo/db"
-	"github.com/Yom3n/RecipeApiGo/utils"
+	healthz "github.com/Yom3n/RecipeApiGo/services"
 	"github.com/joho/godotenv"
 )
 
@@ -26,10 +26,7 @@ func main() {
 	}
 
 	muxHandler := http.NewServeMux()
-	muxHandler.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
-		payload := map[string]string{"greetings": "hello world"}
-		utils.RespondWithJson(w, 200, payload)
-	})
+	muxHandler.HandleFunc("GET /healthz/", healthz.HandlerReadines)
 	server := api.NewAPIServer(serverPort, muxHandler)
 	log.Fatal(server.Run())
 }
