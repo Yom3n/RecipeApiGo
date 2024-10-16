@@ -16,13 +16,12 @@ func main() {
 	}
 
 	dbAddress := os.Getenv("DB_ADDRESS")
-	db.NewPostgressDb(dbAddress)
-
+	db := db.NewPostgressDb(dbAddress)
 	serverPort := os.Getenv("SERVER_PORT")
 	if serverPort == "" {
 		log.Fatal("Missing SERVER_PORT env variable")
 	}
 
-	server := api.NewAPIServer(serverPort)
+	server := api.NewAPIServer(serverPort, db)
 	log.Fatal(server.Run())
 }

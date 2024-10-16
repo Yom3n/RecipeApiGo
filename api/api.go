@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"net/http"
 
-	healthz "github.com/Yom3n/RecipeApiGo/services"
+	"github.com/Yom3n/RecipeApiGo/db/database"
+	healthz "github.com/Yom3n/RecipeApiGo/services/healthz"
+	"github.com/Yom3n/RecipeApiGo/services/users"
 )
 
 type APIServer struct {
@@ -12,10 +14,12 @@ type APIServer struct {
 	handler *http.ServeMux
 }
 
-func NewAPIServer(address string) APIServer {
+func NewAPIServer(address string, db *database.Queries) APIServer {
 	router := http.NewServeMux()
 	healthzHandler := healthz.NewHandler()
 	healthzHandler.RegisterRoutes(router)
+	usersHandler := users.NewHandler(db)
+	usersHandler.RegisterRoutes(router)
 	return APIServer{
 		address: address,
 		handler: router,
