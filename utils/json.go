@@ -15,5 +15,12 @@ func RespondWithJson(w http.ResponseWriter, statusCode int, payload interface{})
 	}
 	w.WriteHeader(statusCode)
 	w.Write(data)
+}
 
+func RespondWithError(w http.ResponseWriter, statusCode int, message string) {
+	type ErrorOutput struct {
+		Error string `json:"error"`
+	}
+	errorOutput := ErrorOutput{message}
+	RespondWithJson(w, statusCode, errorOutput)
 }

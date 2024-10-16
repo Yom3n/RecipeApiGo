@@ -2,12 +2,10 @@ package main
 
 import (
 	"log"
-	"net/http"
 	"os"
 
 	"github.com/Yom3n/RecipeApiGo/api"
 	"github.com/Yom3n/RecipeApiGo/db"
-	healthz "github.com/Yom3n/RecipeApiGo/services"
 	"github.com/joho/godotenv"
 )
 
@@ -25,8 +23,6 @@ func main() {
 		log.Fatal("Missing SERVER_PORT env variable")
 	}
 
-	muxHandler := http.NewServeMux()
-	
-	server := api.NewAPIServer(serverPort, muxHandler)
+	server := api.NewAPIServer(serverPort)
 	log.Fatal(server.Run())
 }

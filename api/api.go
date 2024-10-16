@@ -3,6 +3,8 @@ package api
 import (
 	"fmt"
 	"net/http"
+
+	healthz "github.com/Yom3n/RecipeApiGo/services"
 )
 
 type APIServer struct {
@@ -11,11 +13,12 @@ type APIServer struct {
 }
 
 func NewAPIServer(address string) APIServer {
-handler := http.NewServeMux()
-	handler.HandleFunc("GET /healthz/", healthz.HandlerReadines)
+	router := http.NewServeMux()
+	healthzHandler := healthz.NewHandler()
+	healthzHandler.RegisterRoutes(router)
 	return APIServer{
 		address: address,
-		handler: handler,
+		handler: router,
 	}
 }
 
