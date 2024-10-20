@@ -5,16 +5,16 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/Yom3n/RecipeApiGo/db/database"
+	"github.com/Yom3n/RecipeApiGo/db/db"
 	"github.com/Yom3n/RecipeApiGo/utils"
 	"github.com/google/uuid"
 )
 
 type Handler struct {
-	db *database.Queries
+	db *db.Queries
 }
 
-func NewHandler(db *database.Queries) Handler {
+func NewHandler(db *db.Queries) Handler {
 	return Handler{db: db}
 }
 
@@ -35,7 +35,7 @@ func (h *Handler) createUserHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	user, err := h.db.CreateUser(r.Context(),
-		database.CreateUserParams{
+		db.CreateUserParams{
 			ID:        uuid.New(),
 			CreatedAt: time.Now().UTC(),
 			UpdatedAt: time.Now().UTC(),

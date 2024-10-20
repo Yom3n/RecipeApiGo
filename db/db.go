@@ -4,11 +4,11 @@ import (
 	"database/sql"
 	"log"
 
-	"github.com/Yom3n/RecipeApiGo/db/database"
+	"github.com/Yom3n/RecipeApiGo/db/db"
 	_ "github.com/lib/pq"
 )
 
-func NewPostgressDb(dbUrl string) *database.Queries {
+func NewPostgressDb(dbUrl string) *db.Queries {
 
 	if dbUrl == "" {
 		log.Fatal("Missind DB_ADDRESS env variable")
@@ -22,5 +22,5 @@ func NewPostgressDb(dbUrl string) *database.Queries {
 		log.Fatal("Couldn't ping database: ", pingErr)
 	}
 	log.Print("Connected to database")
-	return database.New(dbConn)
+	return db.New(dbConn)
 }
