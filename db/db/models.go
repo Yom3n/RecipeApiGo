@@ -10,6 +10,15 @@ import (
 	"github.com/google/uuid"
 )
 
+type Recipy struct {
+	ID          uuid.UUID     `json:"id"`
+	CreatedAt   time.Time     `json:"created_at"`
+	UpdatedAt   time.Time     `json:"updated_at"`
+	Title       string        `json:"title"`
+	Description string        `json:"description"`
+	AuthorID    uuid.NullUUID `json:"author_id"`
+}
+
 type User struct {
 	ID        uuid.UUID `json:"id"`
 	CreatedAt time.Time `json:"created_at"`
