@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/Yom3n/RecipeApiGo/auth"
 	"github.com/Yom3n/RecipeApiGo/db/db"
 	"github.com/Yom3n/RecipeApiGo/utils"
 	"github.com/google/uuid"
@@ -26,15 +27,21 @@ func (h *RecipiesHandler) RegisterRoutes(router *http.ServeMux) {
 }
 
 func (h *RecipiesHandler) HandleCreateRecipe(w http.ResponseWriter, r *http.Request) {
+	apiKey, err := auth.GetApiKey(r.Header)
+	if err != nil {
+		utils.RespondWithError(w, 401, err.Error())
+		return
+	}
 	jsonDecoder := json.NewDecoder(r.Body)
 	type RecipeInput struct {
 		Title       string `json:"title"`
 		Description string `json:"description"`
 	}
 	payload := RecipeInput{}
-	err := jsonDecoder.Decode(&payload)
+	err = jsonDecoder.Decode(&payload)
 	if err != nil {
 		utils.RespondWithError(w, 500, err.Error())
+		return
 	}
 	h.db.CreateRecipe(r.Context(), db.CreateRecipeParams{
 		ID:          uuid.New(),
@@ -42,6 +49,6 @@ func (h *RecipiesHandler) HandleCreateRecipe(w http.ResponseWriter, r *http.Requ
 		UpdatedAt:   time.Now(),
 		Title:       payload.Title,
 		Description: payload.Description,
-		AuthorID:    uuid.New(), // TODO Regenerate schema + sqlc and provide user id 
+		AuthorID:    uuid.New(), // TODO Regenerate schema + sqlc and provide user id
 	})
 }

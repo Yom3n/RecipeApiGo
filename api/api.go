@@ -6,6 +6,7 @@ import (
 
 	"github.com/Yom3n/RecipeApiGo/db/db"
 	healthz "github.com/Yom3n/RecipeApiGo/services/healthz"
+	"github.com/Yom3n/RecipeApiGo/services/recipies"
 	"github.com/Yom3n/RecipeApiGo/services/users"
 )
 
@@ -16,10 +17,16 @@ type APIServer struct {
 
 func NewAPIServer(address string, db *db.Queries) APIServer {
 	router := http.NewServeMux()
+
 	healthzHandler := healthz.NewHandler()
 	healthzHandler.RegisterRoutes(router)
+
 	usersHandler := users.NewHandler(db)
 	usersHandler.RegisterRoutes(router)
+
+	recipiesHandler := recipies.NewHandler(db)
+	recipiesHandler.RegisterRoutes(router)
+
 	return APIServer{
 		address: address,
 		handler: router,

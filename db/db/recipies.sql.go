@@ -19,12 +19,12 @@ RETURNING id, created_at, updated_at, title, description, author_id
 `
 
 type CreateRecipeParams struct {
-	ID          uuid.UUID     `json:"id"`
-	CreatedAt   time.Time     `json:"created_at"`
-	UpdatedAt   time.Time     `json:"updated_at"`
-	Title       string        `json:"title"`
-	Description string        `json:"description"`
-	AuthorID    uuid.NullUUID `json:"author_id"`
+	ID          uuid.UUID `json:"id"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
+	Title       string    `json:"title"`
+	Description string    `json:"description"`
+	AuthorID    uuid.UUID `json:"author_id"`
 }
 
 func (q *Queries) CreateRecipe(ctx context.Context, arg CreateRecipeParams) (Recipy, error) {
