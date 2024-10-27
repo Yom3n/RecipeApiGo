@@ -32,6 +32,11 @@ func (h *RecipiesHandler) HandleCreateRecipe(w http.ResponseWriter, r *http.Requ
 		utils.RespondWithError(w, 401, err.Error())
 		return
 	}
+	user, err := h.db.GetUserByApiKey(r.Context(), string(apiKey))
+	if err != nil {
+		utils.RespondWithError(w, 500, err.Error())
+		return
+	}
 	jsonDecoder := json.NewDecoder(r.Body)
 	type RecipeInput struct {
 		Title       string `json:"title"`
@@ -43,12 +48,18 @@ func (h *RecipiesHandler) HandleCreateRecipe(w http.ResponseWriter, r *http.Requ
 		utils.RespondWithError(w, 500, err.Error())
 		return
 	}
-	h.db.CreateRecipe(r.Context(), db.CreateRecipeParams{
+	recipe, err := h.db.CreateRecipe(r.Context(), db.CreateRecipeParams{
 		ID:          uuid.New(),
 		CreatedAt:   time.Now(),
 		UpdatedAt:   time.Now(),
 		Title:       payload.Title,
 		Description: payload.Description,
-		AuthorID:    uuid.New(), // TODO Regenerate schema + sqlc and provide user id
+		AuthorID:    user.ID,
 	})
+
+	if err != nil {
+		utils.RespondWithError(w, 500, err.Error())
+		return
+	}
+	utils.RespondWithJson(w, 201, recipe)
 }
