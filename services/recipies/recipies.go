@@ -2,6 +2,7 @@ package recipies
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 	"time"
 
@@ -22,19 +23,24 @@ func NewHandler(db *db.Queries) RecipiesHandler {
 }
 
 func (h *RecipiesHandler) RegisterRoutes(router *http.ServeMux) {
-	router.HandleFunc("POST recipies/", h.HandleCreateRecipe)
-
+	router.HandleFunc("POST /recipies/", h.HandleCreateRecipe)
 }
 
 func (h *RecipiesHandler) HandleCreateRecipe(w http.ResponseWriter, r *http.Request) {
 	apiKey, err := auth.GetApiKey(r.Header)
 	if err != nil {
 		utils.RespondWithError(w, 401, err.Error())
+		log.Println(err.Error())
 		return
 	}
 	user, err := h.db.GetUserByApiKey(r.Context(), string(apiKey))
 	if err != nil {
 		utils.RespondWithError(w, 500, err.Error())
+		log.Println(err.Error())
+		return
+	}
+	if r.Body == http.NoBody {
+		utils.RespondWithError(w, 400, "Body can't be empty")
 		return
 	}
 	jsonDecoder := json.NewDecoder(r.Body)
@@ -46,6 +52,15 @@ func (h *RecipiesHandler) HandleCreateRecipe(w http.ResponseWriter, r *http.Requ
 	err = jsonDecoder.Decode(&payload)
 	if err != nil {
 		utils.RespondWithError(w, 500, err.Error())
+		log.Println(err.Error())
+		return
+	}
+	if len(payload.Title) == 0 {
+		utils.RespondWithError(w, 400, "title is required")
+		return
+	}
+	if len(payload.Description) == 0 {
+		utils.RespondWithError(w, 400, "desciprion is required")
 		return
 	}
 	recipe, err := h.db.CreateRecipe(r.Context(), db.CreateRecipeParams{
