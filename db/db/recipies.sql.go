@@ -47,3 +47,37 @@ func (q *Queries) CreateRecipe(ctx context.Context, arg CreateRecipeParams) (Rec
 	)
 	return i, err
 }
+
+const getUserRecipies = `-- name: GetUserRecipies :many
+SELECT id, created_at, updated_at, title, description, author_id FROM recipies WHERE (author_id = $1)
+`
+
+func (q *Queries) GetUserRecipies(ctx context.Context, authorID uuid.UUID) ([]Recipy, error) {
+	rows, err := q.db.QueryContext(ctx, getUserRecipies, authorID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Recipy
+	for rows.Next() {
+		var i Recipy
+		if err := rows.Scan(
+			&i.ID,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.Title,
+			&i.Description,
+			&i.AuthorID,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}

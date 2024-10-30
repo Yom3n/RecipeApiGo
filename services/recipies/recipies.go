@@ -24,6 +24,7 @@ func NewHandler(db *db.Queries) RecipiesHandler {
 
 func (h *RecipiesHandler) RegisterRoutes(router *http.ServeMux) {
 	router.HandleFunc("POST /recipies/", h.HandleCreateRecipe)
+	router.HandleFunc("GET /recipies/", h.HandleGetUserRecipies)
 }
 
 func (h *RecipiesHandler) HandleCreateRecipe(w http.ResponseWriter, r *http.Request) {
@@ -77,4 +78,11 @@ func (h *RecipiesHandler) HandleCreateRecipe(w http.ResponseWriter, r *http.Requ
 		return
 	}
 	utils.RespondWithJson(w, 201, recipe)
+}
+
+func (h *RecipiesHandler) HandleGetUserRecipies(w http.ResponseWriter, r *http.Request) {
+	apiKey, _ := auth.GetApiKey(r.Header)
+	user, _ := h.db.GetUserByApiKey(r.Context(), string(apiKey))
+	recipies, _ := h.db.GetUserRecipies(r.Context(), user.ID)
+	utils.RespondWithJson(w, 200, recipies)
 }
