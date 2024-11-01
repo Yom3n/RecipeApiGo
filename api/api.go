@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/Yom3n/RecipeApiGo/db/db"
+	"github.com/Yom3n/RecipeApiGo/middleware"
 	healthz "github.com/Yom3n/RecipeApiGo/services/healthz"
 	"github.com/Yom3n/RecipeApiGo/services/recipies"
 	"github.com/Yom3n/RecipeApiGo/services/users"
@@ -37,7 +38,7 @@ func (s *APIServer) Run() error {
 	fmt.Println("Starting server at :8080")
 	server := &http.Server{
 		Addr:    s.address,
-		Handler: s.handler,
+		Handler: middleware.NewLoggerMiddleware(s.handler),
 	}
 	return server.ListenAndServe()
 }

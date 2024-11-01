@@ -10,19 +10,19 @@ import (
 	"github.com/google/uuid"
 )
 
-type Handler struct {
+type UsersHandler struct {
 	db *db.Queries
 }
 
-func NewHandler(db *db.Queries) Handler {
-	return Handler{db: db}
+func NewHandler(db *db.Queries) UsersHandler {
+	return UsersHandler{db: db}
 }
 
-func (h *Handler) RegisterRoutes(router *http.ServeMux) {
-	router.HandleFunc("POST /users/", h.createUserHandler)
+func (h *UsersHandler) RegisterRoutes(handler *http.ServeMux) {
+	handler.HandleFunc("POST /users/", h.createUserHandler)
 }
 
-func (h *Handler) createUserHandler(w http.ResponseWriter, r *http.Request) {
+func (h *UsersHandler) createUserHandler(w http.ResponseWriter, r *http.Request) {
 	type parameters struct {
 		Name string `json:"name"`
 	}

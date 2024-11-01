@@ -6,16 +6,16 @@ import (
 	"github.com/Yom3n/RecipeApiGo/utils"
 )
 
-type Handler struct{}
+type HealthzHandler struct{}
 
-func NewHandler() *Handler {
-	return &Handler{}
+func NewHandler() *HealthzHandler {
+	return &HealthzHandler{}
 }
 
-func (h *Handler) RegisterRoutes(router *http.ServeMux) {
-	router.HandleFunc("GET /healthz/", h.HandlerReadines)
+func (h *HealthzHandler) RegisterRoutes(handler *http.ServeMux) {
+	handler.HandleFunc("GET /healthz/", h.HandlerReadines)
 }
 
-func (h *Handler) HandlerReadines(w http.ResponseWriter, r *http.Request) {
+func (h *HealthzHandler) HandlerReadines(w http.ResponseWriter, r *http.Request) {
 	utils.RespondWithJson(w, 200, struct{}{})
 }

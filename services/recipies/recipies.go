@@ -22,9 +22,9 @@ func NewHandler(db *db.Queries) RecipiesHandler {
 	}
 }
 
-func (h *RecipiesHandler) RegisterRoutes(router *http.ServeMux) {
-	router.HandleFunc("POST /recipies/", h.HandleCreateRecipe)
-	router.HandleFunc("GET /recipies/", h.HandleGetUserRecipies)
+func (h *RecipiesHandler) RegisterRoutes(handler *http.ServeMux) {
+	handler.HandleFunc("POST /recipies/", h.HandleCreateRecipe)
+	handler.HandleFunc("GET /recipies/", h.HandleGetUserRecipies)
 }
 
 func (h *RecipiesHandler) HandleCreateRecipe(w http.ResponseWriter, r *http.Request) {
