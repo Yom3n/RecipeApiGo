@@ -13,24 +13,24 @@ import (
 
 type APIServer struct {
 	address string
-	handler *http.ServeMux
+	handler http.Handler
 }
 
 func NewAPIServer(address string, db *db.Queries) APIServer {
-	router := http.NewServeMux()
+	handler := http.NewServeMux()
 
 	healthzHandler := healthz.NewHandler()
-	healthzHandler.RegisterRoutes(router)
+	healthzHandler.RegisterRoutes(handler)
 
 	usersHandler := users.NewHandler(db)
-	usersHandler.RegisterRoutes(router)
+	usersHandler.RegisterRoutes(handler)
 
 	recipiesHandler := recipies.NewHandler(db)
-	recipiesHandler.RegisterRoutes(router)
+	recipiesHandler.RegisterRoutes(handler)
 
 	return APIServer{
 		address: address,
-		handler: router,
+		handler: handler,
 	}
 }
 
