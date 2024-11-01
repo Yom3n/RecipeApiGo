@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/Yom3n/RecipeApiGo/auth"
 	"github.com/Yom3n/RecipeApiGo/db/db"
+	"github.com/Yom3n/RecipeApiGo/middleware"
 	"github.com/Yom3n/RecipeApiGo/utils"
 	"github.com/google/uuid"
 )
@@ -23,23 +23,11 @@ func NewHandler(db *db.Queries) RecipiesHandler {
 }
 
 func (h *RecipiesHandler) RegisterRoutes(handler *http.ServeMux) {
-	handler.HandleFunc("POST /recipies/", h.HandleCreateRecipe)
-	handler.HandleFunc("GET /recipies/", h.HandleGetUserRecipies)
+	handler.Handle("POST /recipies/", middleware.NewEnsureAuth(h.HandleCreateRecipe, h.db))
+	handler.Handle("GET /recipies/", middleware.NewEnsureAuth(h.HandleGetUserRecipies, h.db))
 }
 
-func (h *RecipiesHandler) HandleCreateRecipe(w http.ResponseWriter, r *http.Request) {
-	apiKey, err := auth.GetApiKey(r.Header)
-	if err != nil {
-		utils.RespondWithError(w, 401, err.Error())
-		log.Println(err.Error())
-		return
-	}
-	user, err := h.db.GetUserByApiKey(r.Context(), string(apiKey))
-	if err != nil {
-		utils.RespondWithError(w, 500, err.Error())
-		log.Println(err.Error())
-		return
-	}
+func (h *RecipiesHandler) HandleCreateRecipe(w http.ResponseWriter, r *http.Request, user db.User) {
 	if r.Body == http.NoBody {
 		utils.RespondWithError(w, 400, "Body can't be empty")
 		return
@@ -50,7 +38,7 @@ func (h *RecipiesHandler) HandleCreateRecipe(w http.ResponseWriter, r *http.Requ
 		Description string `json:"description"`
 	}
 	payload := RecipeInput{}
-	err = jsonDecoder.Decode(&payload)
+	err := jsonDecoder.Decode(&payload)
 	if err != nil {
 		utils.RespondWithError(w, 500, err.Error())
 		log.Println(err.Error())
@@ -80,9 +68,7 @@ func (h *RecipiesHandler) HandleCreateRecipe(w http.ResponseWriter, r *http.Requ
 	utils.RespondWithJson(w, 201, recipe)
 }
 
-func (h *RecipiesHandler) HandleGetUserRecipies(w http.ResponseWriter, r *http.Request) {
-	apiKey, _ := auth.GetApiKey(r.Header)
-	user, _ := h.db.GetUserByApiKey(r.Context(), string(apiKey))
+func (h *RecipiesHandler) HandleGetUserRecipies(w http.ResponseWriter, r *http.Request, user db.User) {
 	recipies, _ := h.db.GetUserRecipies(r.Context(), user.ID)
 	utils.RespondWithJson(w, 200, recipies)
 }
