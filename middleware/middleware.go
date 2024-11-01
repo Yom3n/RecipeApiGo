@@ -4,6 +4,8 @@ import (
 	"log"
 	"net/http"
 
+	"strings"
+
 	"github.com/Yom3n/RecipeApiGo/auth"
 	"github.com/Yom3n/RecipeApiGo/db/db"
 	"github.com/Yom3n/RecipeApiGo/utils"
@@ -24,8 +26,14 @@ func (ea *EnsureAuthenticated) ServeHTTP(w http.ResponseWriter, r *http.Request)
 	}
 	user, err := ea.db.GetUserByApiKey(r.Context(), string(apiKey))
 	if err != nil {
+		if strings.Contains(err.Error(), "no rows") {
+			log.Println("Wrong api key provided")
+			utils.RespondWithError(w, 403, "Unauthorized access")
+			return
+		}
 		log.Println(err.Error())
 		utils.RespondWithError(w, 500, "Internal error")
+		return
 	}
 	ea.Handler(w, r, user)
 }
