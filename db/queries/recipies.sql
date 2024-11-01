@@ -5,3 +5,6 @@ RETURNING *;
 
 -- name: GetUserRecipies :many
 SELECT * FROM recipies WHERE (author_id = $1);
+
+-- name: GetAllRecipies :many
+SELECT recipies.*, users.name as author_name FROM recipies JOIN users ON recipies.author_id = users.id;

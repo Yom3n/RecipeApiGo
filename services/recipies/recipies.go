@@ -24,7 +24,8 @@ func NewHandler(db *db.Queries) RecipiesHandler {
 
 func (h *RecipiesHandler) RegisterRoutes(handler *http.ServeMux) {
 	handler.Handle("POST /recipies/", middleware.NewEnsureAuth(h.HandleCreateRecipe, h.db))
-	handler.Handle("GET /recipies/", middleware.NewEnsureAuth(h.HandleGetUserRecipies, h.db))
+	handler.Handle("GET /user-recipies/", middleware.NewEnsureAuth(h.HandleGetUserRecipies, h.db))
+	handler.HandleFunc("GET /recipies-feed/", h.GetRecipiesFeed)
 }
 
 func (h *RecipiesHandler) HandleCreateRecipe(w http.ResponseWriter, r *http.Request, user db.User) {
@@ -70,5 +71,14 @@ func (h *RecipiesHandler) HandleCreateRecipe(w http.ResponseWriter, r *http.Requ
 
 func (h *RecipiesHandler) HandleGetUserRecipies(w http.ResponseWriter, r *http.Request, user db.User) {
 	recipies, _ := h.db.GetUserRecipies(r.Context(), user.ID)
+	utils.RespondWithJson(w, 200, recipies)
+}
+
+func (h *RecipiesHandler) GetRecipiesFeed(w http.ResponseWriter, r *http.Request) {
+	recipies, err := h.db.GetAllRecipies(r.Context())
+	if err != nil {
+		log.Println(err.Error())
+		utils.RespondWithError(w, 500, "Internal error")
+	}
 	utils.RespondWithJson(w, 200, recipies)
 }

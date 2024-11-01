@@ -48,6 +48,51 @@ func (q *Queries) CreateRecipe(ctx context.Context, arg CreateRecipeParams) (Rec
 	return i, err
 }
 
+const getAllRecipies = `-- name: GetAllRecipies :many
+SELECT recipies.id, recipies.created_at, recipies.updated_at, recipies.title, recipies.description, recipies.author_id, users.name as author_name FROM recipies JOIN users ON recipies.author_id = users.id
+`
+
+type GetAllRecipiesRow struct {
+	ID          uuid.UUID `json:"id"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
+	Title       string    `json:"title"`
+	Description string    `json:"description"`
+	AuthorID    uuid.UUID `json:"author_id"`
+	AuthorName  string    `json:"author_name"`
+}
+
+func (q *Queries) GetAllRecipies(ctx context.Context) ([]GetAllRecipiesRow, error) {
+	rows, err := q.db.QueryContext(ctx, getAllRecipies)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetAllRecipiesRow
+	for rows.Next() {
+		var i GetAllRecipiesRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.Title,
+			&i.Description,
+			&i.AuthorID,
+			&i.AuthorName,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getUserRecipies = `-- name: GetUserRecipies :many
 SELECT id, created_at, updated_at, title, description, author_id FROM recipies WHERE (author_id = $1)
 `
