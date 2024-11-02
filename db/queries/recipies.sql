@@ -3,6 +3,10 @@ INSERT INTO recipies (id, created_at, updated_at, title, description, author_id)
 VALUES($1, $2, $3, $4, $5, $6)
 RETURNING *;
 
+-- name: UpdateRecipe :one
+UPDATE recipies SET title = $1, description = $2 WHERE id = $3
+RETURNING *;
+
 -- name: GetUserRecipies :many
 SELECT * FROM recipies WHERE (author_id = $1);
 

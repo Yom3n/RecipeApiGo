@@ -3,6 +3,7 @@ package recipies
 import (
 	"encoding/json"
 	"log"
+	"log/slog"
 	"net/http"
 	"time"
 
@@ -24,6 +25,7 @@ func NewHandler(db *db.Queries) RecipiesHandler {
 
 func (h *RecipiesHandler) RegisterRoutes(handler *http.ServeMux) {
 	handler.Handle("POST /recipies/", middleware.NewEnsureAuth(h.HandleCreateRecipe, h.db))
+	handler.Handle("PATCH /recipies/{id}/", middleware.NewEnsureAuth(h.HandlePatchRecipe, h.db))
 	handler.Handle("GET /user-recipies/", middleware.NewEnsureAuth(h.HandleGetUserRecipies, h.db))
 	handler.HandleFunc("GET /recipies-feed/", h.GetRecipiesFeed)
 }
@@ -67,6 +69,40 @@ func (h *RecipiesHandler) HandleCreateRecipe(w http.ResponseWriter, r *http.Requ
 		return
 	}
 	utils.RespondWithJson(w, 201, recipe)
+}
+
+func (h *RecipiesHandler) HandlePatchRecipe(w http.ResponseWriter, r *http.Request, user db.User) {
+	defer r.Body.Close()
+	recipeId, err := uuid.Parse(r.PathValue("id"))
+	if err != nil {
+		utils.RespondWithError(w, 400, "Malformed recipe id")
+		slog.Error(err.Error())
+		return
+	}
+	decoder := json.NewDecoder(r.Body)
+	type PatchRecipeInput struct {
+		Title       string `json:"title"`
+		Description string `json:"description"`
+	}
+	payload := PatchRecipeInput{}
+	err = decoder.Decode(&payload)
+	if err != nil {
+		log.Println("KURWA")
+		utils.RespondWithError(w, 400, err.Error())
+		slog.Error(err.Error())
+		return
+	}
+	updatedRecipe, err := h.db.UpdateRecipe(r.Context(), db.UpdateRecipeParams{
+		Title:       payload.Title,
+		Description: payload.Description,
+		ID:          recipeId,
+	})
+	if err != nil {
+		utils.RespondWithError(w, 400, err.Error())
+		slog.Error(err.Error())
+		return
+	}
+	utils.RespondWithJson(w, 200, updatedRecipe)
 }
 
 func (h *RecipiesHandler) HandleGetUserRecipies(w http.ResponseWriter, r *http.Request, user db.User) {

@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"log"
+	"log/slog"
 	"net/http"
 
 	"strings"
@@ -53,6 +54,6 @@ func NewLoggerMiddleware(handlerToWrap http.Handler) *LoggerMiddleware {
 func (lm *LoggerMiddleware) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	method := r.Method
 	url := r.URL
-	log.Printf("%s on %s", method, url)
+	slog.Info("Processing request: ", "Method", method, "URL", url)
 	lm.Handler.ServeHTTP(w, r)
 }

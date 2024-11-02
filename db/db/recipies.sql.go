@@ -126,3 +126,28 @@ func (q *Queries) GetUserRecipies(ctx context.Context, authorID uuid.UUID) ([]Re
 	}
 	return items, nil
 }
+
+const updateRecipe = `-- name: UpdateRecipe :one
+UPDATE recipies SET title = $1, description = $2 WHERE id = $3
+RETURNING id, created_at, updated_at, title, description, author_id
+`
+
+type UpdateRecipeParams struct {
+	Title       string    `json:"title"`
+	Description string    `json:"description"`
+	ID          uuid.UUID `json:"id"`
+}
+
+func (q *Queries) UpdateRecipe(ctx context.Context, arg UpdateRecipeParams) (Recipy, error) {
+	row := q.db.QueryRowContext(ctx, updateRecipe, arg.Title, arg.Description, arg.ID)
+	var i Recipy
+	err := row.Scan(
+		&i.ID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.Title,
+		&i.Description,
+		&i.AuthorID,
+	)
+	return i, err
+}
