@@ -1,2 +1,5 @@
 # RecipeApiGo
-Create your recipies
+Recipies API written with go.
+Used pacakges:
+- goose
+- sqlc
