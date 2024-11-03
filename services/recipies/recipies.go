@@ -111,10 +111,17 @@ func (h *RecipiesHandler) HandleDeleteRecipe(w http.ResponseWriter, r *http.Requ
 		slog.Error("Could not parse recipe id", "error", err.Error())
 		return
 	}
-	err = h.db.DeleteRecipe(r.Context(), db.DeleteRecipeParams{
-		ID:       recipeId,
-		AuthorID: user.ID,
-	})
+	recipeToDelete, err := h.db.GetRecipe(r.Context(), recipeId)
+	if err != nil {
+		slog.Info(err.Error())
+		utils.RespondWithError(w, 404, "Recipe does not exist")
+		return
+	}
+	if recipeToDelete.AuthorID != user.ID {
+		utils.RespondWithError(w, 402, "You cannot delete this recipe")
+		return
+	}
+	err = h.db.DeleteRecipe(r.Context(), recipeId)
 	if err != nil {
 		utils.RespondWithError(w, 500, "Error while deleting recipe")
 		slog.Error(err.Error())
