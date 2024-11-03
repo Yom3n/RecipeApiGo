@@ -7,6 +7,9 @@ RETURNING *;
 UPDATE recipies SET title = $1, description = $2 WHERE id = $3
 RETURNING *;
 
+-- name: DeleteRecipe :exec
+DELETE FROM recipies WHERE (id=$1 AND author_id=$2);
+
 -- name: GetUserRecipies :many
 SELECT * FROM recipies WHERE (author_id = $1);
 

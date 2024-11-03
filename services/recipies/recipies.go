@@ -26,6 +26,7 @@ func NewHandler(db *db.Queries) RecipiesHandler {
 func (h *RecipiesHandler) RegisterRoutes(handler *http.ServeMux) {
 	handler.Handle("POST /recipies/", middleware.NewEnsureAuth(h.HandleCreateRecipe, h.db))
 	handler.Handle("PATCH /recipies/{id}/", middleware.NewEnsureAuth(h.HandlePatchRecipe, h.db))
+	handler.Handle("DELETE /recipies/{id}/", middleware.NewEnsureAuth(h.HandleDeleteRecipe, h.db))
 	handler.Handle("GET /user-recipies/", middleware.NewEnsureAuth(h.HandleGetUserRecipies, h.db))
 	handler.HandleFunc("GET /recipies-feed/", h.GetRecipiesFeed)
 }
@@ -72,7 +73,6 @@ func (h *RecipiesHandler) HandleCreateRecipe(w http.ResponseWriter, r *http.Requ
 }
 
 func (h *RecipiesHandler) HandlePatchRecipe(w http.ResponseWriter, r *http.Request, user db.User) {
-	defer r.Body.Close()
 	recipeId, err := uuid.Parse(r.PathValue("id"))
 	if err != nil {
 		utils.RespondWithError(w, 400, "Malformed recipe id")
@@ -87,7 +87,6 @@ func (h *RecipiesHandler) HandlePatchRecipe(w http.ResponseWriter, r *http.Reque
 	payload := PatchRecipeInput{}
 	err = decoder.Decode(&payload)
 	if err != nil {
-		log.Println("KURWA")
 		utils.RespondWithError(w, 400, err.Error())
 		slog.Error(err.Error())
 		return
@@ -103,6 +102,25 @@ func (h *RecipiesHandler) HandlePatchRecipe(w http.ResponseWriter, r *http.Reque
 		return
 	}
 	utils.RespondWithJson(w, 200, updatedRecipe)
+}
+
+func (h *RecipiesHandler) HandleDeleteRecipe(w http.ResponseWriter, r *http.Request, user db.User) {
+	recipeId, err := uuid.Parse(r.PathValue("id"))
+	if err != nil {
+		utils.RespondWithError(w, 400, "Incorrect recipe id")
+		slog.Error("Could not parse recipe id", "error", err.Error())
+		return
+	}
+	err = h.db.DeleteRecipe(r.Context(), db.DeleteRecipeParams{
+		ID:       recipeId,
+		AuthorID: user.ID,
+	})
+	if err != nil {
+		utils.RespondWithError(w, 500, "Error while deleting recipe")
+		slog.Error(err.Error())
+		return
+	}
+	utils.RespondWithJson(w, 200, struct{}{})
 }
 
 func (h *RecipiesHandler) HandleGetUserRecipies(w http.ResponseWriter, r *http.Request, user db.User) {
